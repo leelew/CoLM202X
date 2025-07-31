@@ -17,6 +17,7 @@ MODULE MOD_DA_Main
    USE MOD_DA_GRACE
    USE MOD_DA_SMAP
    USE MOD_DA_FY3D
+   USE MOD_DA_SYNOP
    USE MOD_Vars_1DFluxes
    USE MOD_Vars_TimeVariables
    USE MOD_DA_Vars_1DFluxes
@@ -52,6 +53,10 @@ CONTAINS
       CALL init_DA_FY3D  ()
    ENDIF
 
+   IF (DEF_DA_SYNOP) THEN
+      CALL init_DA_SYNOP ()
+   ENDIF
+
    END SUBROUTINE init_DA
 
 !-----------------------------------------------------------------------------
@@ -83,6 +88,10 @@ CONTAINS
 
       IF (DEF_DA_FY3D) THEN
          CALL run_DA_FY3D  (idate, deltim)
+      ENDIF
+      
+      IF (DEF_DA_SYNOP) THEN
+         CALL run_DA_SYNOP (idate, deltim)
       ENDIF
 
 !#############################################################################
@@ -141,6 +150,10 @@ CONTAINS
 
    IF (DEF_DA_FY3D) THEN
       CALL end_DA_FY3D  ()
+   ENDIF
+
+   IF (DEF_DA_SYNOP) THEN
+      CALL end_DA_SYNOP ()
    ENDIF
 
    END SUBROUTINE end_DA

@@ -272,6 +272,7 @@ OBJS_MAIN = \
 				MOD_DA_EnKF.o                             \
 				MOD_DA_SMAP.o                             \
 				MOD_DA_FY3D.o                             \
+				MOD_DA_SYNOP.o                            \
 				MOD_DA_Main.o                        	  \
 				MOD_DA_Ensemble.o                         \
 				MOD_DA_Driver.o                           \
