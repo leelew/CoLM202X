@@ -149,7 +149,8 @@ MODULE MOD_Namelist
    logical :: DEF_USE_PFT  = .false.
    logical :: DEF_USE_PC   = .false.
    logical :: DEF_SOLO_PFT = .false.
-   logical :: DEF_FAST_PC  = .false.
+   logical :: DEF_FAST_PC  = .true.
+   logical :: DEF_PC_CROP_SPLIT = .true.
    character(len=256) :: DEF_SUBGRID_SCHEME = 'LCT'
 
    logical :: DEF_LANDONLY                  = .true.
@@ -261,7 +262,7 @@ MODULE MOD_Namelist
    integer :: DEF_RSS_SCHEME = 1
 
    ! ----- Options for runoff parameterization schemes -----
-   ! 0: scheme from SIMTOP model, also used in CoLM2014
+   ! 0: scheme from TOPMODEL, also used in CoLM2014
    ! 1: scheme from VIC model
    ! 2: scheme from XinAnJiang model, also used in ECMWF model
    ! 3: scheme from Simple VIC, also used in NoahMP 5.0
@@ -269,7 +270,7 @@ MODULE MOD_Namelist
    integer :: DEF_Runoff_SCHEME = 3
    character(len=256) :: DEF_file_VIC_para = 'null'
 
-   integer :: DEF_SimTOP_method = 0
+   integer :: DEF_TOPMOD_method = 0
 
    ! ----- Treat exposed soil and snow surface separately -----
    ! including solar absorption, sensible/latent heat, ground temperature,
@@ -441,7 +442,7 @@ MODULE MOD_Namelist
    character(len=256) :: DEF_DA_obsdir  = 'null'
    logical            :: DEF_DA_GRACE   = .false.
    logical            :: DEF_DA_SMAP    = .false.
-   logical            :: DEF_DA_CMEM    = .false.    
+   logical            :: DEF_DA_CMEM    = .false.
    logical            :: DEF_DA_FY3D    = .false.
    logical            :: DEF_DA_SYNOP   = .false.
    integer            :: DEF_DA_ENS     = 20
@@ -952,6 +953,7 @@ CONTAINS
       DEF_USE_PFT,                            &
       DEF_USE_PC,                             &
       DEF_FAST_PC,                            &
+      DEF_PC_CROP_SPLIT,                      &
       DEF_SOLO_PFT,                           &
       DEF_SUBGRID_SCHEME,                     &
 
@@ -985,7 +987,7 @@ CONTAINS
       DEF_SOIL_REFL_SCHEME,                   &
       DEF_RSS_SCHEME,                         &
       DEF_Runoff_SCHEME,                      &
-      DEF_SimTOP_method,                      &
+      DEF_TOPMOD_method,                      &
       DEF_SPLIT_SOILSNOW,                     &
       DEF_VEG_SNOW,                           &
       DEF_file_VIC_para,                      &
@@ -1138,8 +1140,8 @@ CONTAINS
 #endif
 #ifdef SinglePoint
          IF (DEF_Runoff_SCHEME = 0) THEN
-            write(*,*) 'Note: DEF_SimTOP_method is set to 0 in SinglePoint.'
-            DEF_SimTOP_method = 0
+            write(*,*) 'Note: DEF_TOPMOD_method is set to 0 in SinglePoint.'
+            DEF_TOPMOD_method = 0
          ENDIF
 #endif
 
@@ -1480,6 +1482,7 @@ CONTAINS
       CALL mpi_bcast (DEF_USE_PFT                            ,1   ,mpi_logical   ,p_address_master ,p_comm_glb ,p_err)
       CALL mpi_bcast (DEF_USE_PC                             ,1   ,mpi_logical   ,p_address_master ,p_comm_glb ,p_err)
       CALL mpi_bcast (DEF_FAST_PC                            ,1   ,mpi_logical   ,p_address_master ,p_comm_glb ,p_err)
+      CALL mpi_bcast (DEF_PC_CROP_SPLIT                      ,1   ,mpi_logical   ,p_address_master ,p_comm_glb ,p_err)
       CALL mpi_bcast (DEF_SOLO_PFT                           ,1   ,mpi_logical   ,p_address_master ,p_comm_glb ,p_err)
       CALL mpi_bcast (DEF_SUBGRID_SCHEME                     ,256 ,mpi_character ,p_address_master ,p_comm_glb ,p_err)
 
@@ -1518,7 +1521,7 @@ CONTAINS
       ! 02/2024, added by Shupeng Zhang
       CALL mpi_bcast (DEF_Runoff_SCHEME                      ,1   ,mpi_integer   ,p_address_master ,p_comm_glb ,p_err)
       CALL mpi_bcast (DEF_file_VIC_para                      ,256 ,mpi_character ,p_address_master ,p_comm_glb ,p_err)
-      CALL mpi_bcast (DEF_SimTOP_method                      ,1   ,mpi_integer   ,p_address_master ,p_comm_glb ,p_err)
+      CALL mpi_bcast (DEF_TOPMOD_method                      ,1   ,mpi_integer   ,p_address_master ,p_comm_glb ,p_err)
       ! 08/2023, added by hua yuan
       CALL mpi_bcast (DEF_SPLIT_SOILSNOW                     ,1   ,mpi_logical   ,p_address_master ,p_comm_glb ,p_err)
       CALL mpi_bcast (DEF_VEG_SNOW                           ,1   ,mpi_logical   ,p_address_master ,p_comm_glb ,p_err)
