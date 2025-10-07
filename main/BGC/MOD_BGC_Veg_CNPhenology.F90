@@ -21,7 +21,7 @@ MODULE MOD_BGC_Veg_CNPhenology
        lflitcn, lf_flab, lf_fcel, lf_flig  , fr_flab, fr_fcel, fr_flig, &
 
  ! crop variables
-        manunitro, lfemerg, mxmat, grnfill,  baset
+       lfemerg, mxmat, grnfill,  baset
 
    USE MOD_BGC_Vars_TimeInvariants, only: &
        ndays_on        , ndays_off      , fstor2tran, crit_dayl  , crit_onset_fdd, crit_onset_swi, &
@@ -73,11 +73,11 @@ MODULE MOD_BGC_Veg_CNPhenology
 ! crop variables
 #ifdef CROP
        cropplant_p       , idop_p              , a5tmin_p            , a10tmin_p        , t10_p          , &
-       cumvd_p           , vf_p                , cphase_p         , fert_counter_p , &
-       croplive_p        , gddplant_p          , harvdate_p          , gddmaturity_p  , &
+       cumvd_p           , vf_p                , cphase_p            , fert_counter_p   , &
+       croplive_p        , gddplant_p          , harvdate_p          , gddmaturity_p    , &
        hui_p             , peaklai_p           , &
-       tref_min_p        , tref_max_p          , tref_min_inst_p  , tref_max_inst_p, &
-       fertnitro_p       , plantdate_p         , fert_p           ,&! input from files
+       tref_min_p        , tref_max_p          , tref_min_inst_p     , tref_max_inst_p  , &
+       manunitro_p       , fertnitro_p         , plantdate_p         , fert_p           , &! input from files
 #endif
 
        leaf_prof_p        , froot_prof_p        , &
@@ -259,13 +259,13 @@ CONTAINS
       DO m = ps , pe
          tempavg_tref_p(m) = tempavg_tref_p(m) + tref_p(m) * (deltim/86400._r8/dayspyr)
 #ifdef CROP
-         IF(idate(3) .eq. 1800 .or. tref_max_inst_p(m) .eq. spval)THEN
+         IF(idate(3) .eq. deltim .or. tref_max_inst_p(m) .eq. spval)THEN
             tref_max_inst_p(m) = tref_p(m)
          ELSE
             tref_max_inst_p(m) = max(tref_max_inst_p(m) , tref_p(m))
          ENDIF
 
-         IF(idate(3) .eq. 1800 .or. tref_min_inst_p(m) .eq. spval)THEN
+         IF(idate(3) .eq. deltim .or. tref_min_inst_p(m) .eq. spval)THEN
             tref_min_inst_p(m) = tref_p(m)
          ELSE
             tref_min_inst_p(m) = min(tref_min_inst_p(m) , tref_p(m))
@@ -317,7 +317,7 @@ CONTAINS
     !calculate gdd020,gdd820,gdd1020 for gddmaturity in GPAM crop phenology F. Li
       DO m = ps , pe
          ivt = pftclass(m)
-         IF (idate(2) == 1 .and. idate(3) ==1800)THEN
+         IF (idate(2) == 1 .and. idate(3) == deltim)THEN
             IF(nyrs_crop_active_p(m) == 0) THEN ! YR 1:
                gdd020_p(m)  = 0._r8                      ! set gdd..20 variables to 0
                gdd820_p(m)  = 0._r8                      ! and crops will not be planted
@@ -1115,9 +1115,9 @@ CONTAINS
               ! enter phase 2 onset for one time step:
               ! transfer seed carbon to leaf emergence
 
-               IF (peaklai_p(m) >= 1) THEN
-                  hui_p(m) = max(hui_p(m),grnfill(ivt))
-               ENDIF
+               ! IF (peaklai_p(m) >= 1) THEN
+               !    hui_p(m) = max(hui_p(m),grnfill(ivt))
+               ! ENDIF
 
                IF (hui_p(m) >= lfemerg(ivt) .and. hui_p(m) < grnfill(ivt) .and. idpp < mxmat(ivt)) THEN
                   cphase_p(m) = 2._r8
@@ -1136,7 +1136,7 @@ CONTAINS
                      fert_counter_p(m)  = ndays_on * 86400.
                      IF (ndays_on .gt. 0) THEN
                         IF(DEF_USE_FERT)THEN
-                           fert_p(m) = (manunitro(ivt) * 1000._r8 + fertnitro_p(m))/ fert_counter_p(m)
+                           fert_p(m) = (manunitro_p(m) + fertnitro_p(m))/ fert_counter_p(m)
                         ELSE
                            fert_p(m) = 0._r8
                         ENDIF
